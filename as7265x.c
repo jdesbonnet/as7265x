@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "i2c.h"
+#include "as7265x.h"
+
 
 #define I2C_AS72XX_SLAVE_STATUS_REG 0x00
 #define I2C_AS72XX_SLAVE_WRITE_REG 0x01
@@ -11,20 +13,26 @@
 #define I2C_AS72XX_SLAVE_TX_VALID 0x02
 #define I2C_AS72XX_SLAVE_RX_VALID 0x01
 
+/**
+ * Read a I2C (real) register from AS7265x
+ */
 int i2cm_read(int i2c_fd, int addr) {
 	uint8_t result;
 	i2c_register_read(i2c_fd, 0x49, addr, &result);
 	return result;
 } 
 
+/**
+ * Write a I2C (real) register to AS7265x.
+ */
 int i2cm_write(int i2c_fd, int addr, int value) {
 	i2c_register_write(i2c_fd, 0x49, addr, value);
 }
 
 /**
- * Write to AS721x virtual register
+ * Write to AS7265x virtual register
  */
-void i2cm_AS72xx_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
+void as7265x_vreg_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 {
 	volatile uint8_t status;
 	while (1)
@@ -50,9 +58,9 @@ void i2cm_AS72xx_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 }
 
 /**
- * Read from AS7x1x virtual register 
+ * Read from AS7265x virtual register 
  */
-uint8_t i2cm_AS72xx_read(int i2c_fd, uint8_t virtualReg)
+uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 {
 	volatile uint8_t status, d;
 
@@ -92,6 +100,28 @@ uint8_t i2cm_AS72xx_read(int i2c_fd, uint8_t virtualReg)
 	return d;
 }
 
+/**
+ * Select device
+ *
+ * @param device 0=master; 1=first slave; 2=second slave
+ */
+int as7265x_select_device(int i2c_fd, uint8_t device) {
+	as7265x_vreg_write(i2c_fd, AS7265X_DEV_SELECT_CONTROL, device);
+}
+
+void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
+{
+	as7265x_select_device(i2c_fd,device);
+
+	current &= 0b11;
+
+	uint8_t value = as7265x_vreg_read(i2c_fd,AS7265X_LED_CONFIG);
+	value &= 0b11001111; //Clear ICL_DRV bits
+	value |= (current << 4); //Set ICL_DRV bits with user's choice
+	as7265x_vreg_write(i2c_fd,AS7265X_LED_CONFIG, value);
+}
+
+
 
 void usage () {
 	fprintf (stderr,"as7265x register [value]\n");
@@ -114,9 +144,9 @@ void main (int argc, char **argv) {
 	if (argc >= 3) {
 		int val = atoi(argv[2]);
 		fprintf (stderr,"writing register %x with %x\n",reg,val);
-		i2cm_AS72xx_write(i2c_fd,reg,val);
+		as7265x_vreg_write(i2c_fd,reg,val);
 	} else {
-		fprintf (stderr,"reading as7265x virtual register 0x%x, value=0x%x\n", reg, i2cm_AS72xx_read(i2c_fd,reg));
+		fprintf (stderr,"reading as7265x virtual register 0x%x, value=0x%x\n", reg, as7265x_vreg_read(i2c_fd,reg));
 	}
 
 }
