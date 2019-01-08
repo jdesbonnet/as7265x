@@ -48,7 +48,43 @@
 #define AS7265X_COEF_DATA_WRITE   0x55
 
 
-void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device);
-void as7265x_vreg_write(int i2c_fd, uint8_t vreg, uint8_t value);
+//Settings 
+
+#define AS7265X_POLLING_DELAY 5 //Amount of ms to wait between checking for virtual register changes
+
+#define AS72651_NIR     0x00
+#define AS72652_VISIBLE     0x01
+#define AS72653_UV      0x02
+
+#define AS7265x_LED_WHITE	0x00 //White LED is connected to x51
+#define AS7265x_LED_IR	0x01 //IR LED is connected to x52
+#define AS7265x_LED_UV	0x02 //UV LED is connected to x53
+
+#define AS7265X_LED_CURRENT_LIMIT_12_5MA  0b00
+#define AS7265X_LED_CURRENT_LIMIT_25MA    0b01
+#define AS7265X_LED_CURRENT_LIMIT_50MA    0b10
+#define AS7265X_LED_CURRENT_LIMIT_100MA   0b11
+
+#define AS7265X_INDICATOR_CURRENT_LIMIT_1MA   0b00
+#define AS7265X_INDICATOR_CURRENT_LIMIT_2MA   0b01
+#define AS7265X_INDICATOR_CURRENT_LIMIT_4MA   0b10
+#define AS7265X_INDICATOR_CURRENT_LIMIT_8MA   0b11
+
+#define AS7265X_GAIN_1X   0b00
+#define AS7265X_GAIN_37X   0b01
+#define AS7265X_GAIN_16X   0b10
+#define AS7265X_GAIN_64X   0b11
+
+#define AS7265X_MEASUREMENT_MODE_4CHAN   0b00
+#define AS7265X_MEASUREMENT_MODE_4CHAN_2   0b01
+#define AS7265X_MEASUREMENT_MODE_6CHAN_CONTINUOUS   0b10
+#define AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT   0b11
+
+
+int     as7265x_is_data_available(int i2c_fd);
+void    as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device);
+void    as7265x_vreg_write(int i2c_fd, uint8_t vreg, uint8_t value);
 uint8_t as7265x_vreg_read(int i2c_fd, uint8_t vreg);
+void    as7265x_set_measurement_mode(int i2c_fd, uint8_t mode);
+
 

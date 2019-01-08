@@ -24,6 +24,12 @@ int i2cm_write(int i2c_fd, int addr, int value) {
 	i2c_register_write(i2c_fd, 0x49, addr, value);
 }
 
+int as7265x_is_data_available (int i2c_fd)
+{
+	int status = i2cm_read(i2c_fd, I2C_AS72XX_SLAVE_STATUS_REG);
+	return (status & I2C_AS72XX_SLAVE_RX_VALID);
+}
+
 /**
  * Write to AS7265x virtual register
  */
@@ -104,6 +110,9 @@ int as7265x_select_device(int i2c_fd, uint8_t device) {
 	as7265x_vreg_write(i2c_fd, AS7265X_DEV_SELECT_CONTROL, device);
 }
 
+/**
+ * Set bulb current.
+ */
 void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
 {
 	as7265x_select_device(i2c_fd,device);
@@ -116,6 +125,39 @@ void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
 	as7265x_vreg_write(i2c_fd,AS7265X_LED_CONFIG, value);
 }
 
+/**
+ * Set measurement mode.
+ * 
+ * @param mode 2 = all 6 channels continuous; 3 = one shot all channels
+ */
+void as7265x_set_measurement_mode(int i2c_fd, uint8_t mode) 
+{
+	mode &= 0b11;
+	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
+	value &= 0b11110011;
+	value |= (mode << 2);
+	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, value);
+}
+
+float as7265x_get_calibrated_value (int i2c_fd, uint8_t channel, uint8_t device) {
+	return 0.0;
+}
+
+void as7265x_measure(int i2c_fd)
+{
+	int i;
+	as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
+	for (i = 0; i < 100; i++) {
+		if ( as7265x_is_data_available(i2c_fd) ) 
+		{
+			break;
+		}
+	}
+
+
+	as7265x_get_calibrated_value (i2c_fd, AS7265X_R_G_A_CAL, AS72653_UV);
+
+}
 
 
 static void usage () {
