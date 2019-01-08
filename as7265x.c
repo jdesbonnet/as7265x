@@ -7,11 +7,6 @@
 #include "as7265x.h"
 
 
-#define I2C_AS72XX_SLAVE_STATUS_REG 0x00
-#define I2C_AS72XX_SLAVE_WRITE_REG 0x01
-#define I2C_AS72XX_SLAVE_READ_REG 0x02
-#define I2C_AS72XX_SLAVE_TX_VALID 0x02
-#define I2C_AS72XX_SLAVE_RX_VALID 0x01
 
 /**
  * Read a I2C (real) register from AS7265x
@@ -123,12 +118,12 @@ void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
 
 
 
-void usage () {
+static void usage () {
 	fprintf (stderr,"as7265x register [value]\n");
 	fprintf (stderr,"read or write a AS7265X virtual register.\n");
 }
 
-void main (int argc, char **argv) {
+static void main (int argc, char **argv) {
 
 	int i2c_fd;
 	

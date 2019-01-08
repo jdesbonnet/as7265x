@@ -1,6 +1,14 @@
 
 // Code partually copied from Sparkfun Arduino library
 
+
+#define I2C_AS72XX_SLAVE_STATUS_REG 0x00
+#define I2C_AS72XX_SLAVE_WRITE_REG 0x01
+#define I2C_AS72XX_SLAVE_READ_REG 0x02
+#define I2C_AS72XX_SLAVE_TX_VALID 0x02
+#define I2C_AS72XX_SLAVE_RX_VALID 0x01
+
+
 // Virtual Register addresses
 
 #define AS7265X_HW_VERSION_HIGH   0x00
@@ -40,4 +48,7 @@
 #define AS7265X_COEF_DATA_WRITE   0x55
 
 
+void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device);
+void as7265x_vreg_write(int i2c_fd, uint8_t vreg, uint8_t value);
+uint8_t as7265x_vreg_read(int i2c_fd, uint8_t vreg);
 
