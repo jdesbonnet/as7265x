@@ -24,5 +24,13 @@ void main (int argc, char **argv) {
 	i2c_fd = i2c_init("/dev/i2c-1");
 
 	as7265x_set_bulb_current (i2c_fd, 2, 1);
+	as7265x_bulb_enable (i2c_fd, 2);
+
+	float f = as7265x_get_calibrated_value(i2c_fd, AS72653_UV, AS7265X_R_G_A_CAL);
+
+	fprintf (stdout, "f=%f\n", f);
+
+	sleep(2);
+	as7265x_soft_reset(i2c_fd);
 
 }

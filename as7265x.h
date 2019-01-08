@@ -81,10 +81,38 @@
 #define AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT   0b11
 
 
+struct {
+	// AS72651
+	float A;
+	float B;
+	float C;
+	float D;
+	float E;
+	float F;
+
+	// AS72652
+	float G;
+	float H;
+	float I;
+	float J;
+	float K;
+	float L;
+
+	// AS72651
+	float R;
+	float S;
+	float T;
+	float U;
+	float V;
+	float W;
+} reading_calibrated_t;
+
 int     as7265x_is_data_available(int i2c_fd);
-void    as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device);
+void    as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current);
+void    as7265x_bulb_enable(int i2c_fd, uint8_t device);
 void    as7265x_vreg_write(int i2c_fd, uint8_t vreg, uint8_t value);
 uint8_t as7265x_vreg_read(int i2c_fd, uint8_t vreg);
 void    as7265x_set_measurement_mode(int i2c_fd, uint8_t mode);
-
-
+void    as7265x_device_select(int i2c_fd, uint8_t device);
+void    as7265x_soft_reset(int i2c_fd);
+float   as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_addr);

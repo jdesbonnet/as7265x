@@ -106,16 +106,19 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
  *
  * @param device 0=master; 1=first slave; 2=second slave
  */
-int as7265x_select_device(int i2c_fd, uint8_t device) {
+void as7265x_device_select(int i2c_fd, uint8_t device) {
 	as7265x_vreg_write(i2c_fd, AS7265X_DEV_SELECT_CONTROL, device);
 }
 
 /**
  * Set bulb current.
+ *
+ * @param device 0, 1, or 2
+ * @param current 
  */
-void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
+void as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current)
 {
-	as7265x_select_device(i2c_fd,device);
+	as7265x_device_select(i2c_fd,device);
 
 	current &= 0b11;
 
@@ -123,6 +126,19 @@ void as7265x_set_bulb_current(int i2c_fd, uint8_t current, uint8_t device)
 	value &= 0b11001111; //Clear ICL_DRV bits
 	value |= (current << 4); //Set ICL_DRV bits with user's choice
 	as7265x_vreg_write(i2c_fd,AS7265X_LED_CONFIG, value);
+}
+
+/**
+ * Bulb enable / disable
+ */
+void as7265x_bulb_enable (int i2c_fd, uint8_t device) 
+{
+	as7265x_device_select(i2c_fd, device);
+
+	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+	// bit 3: bulb enable
+	value |= (1 << 3);
+	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
 }
 
 /**
@@ -139,8 +155,28 @@ void as7265x_set_measurement_mode(int i2c_fd, uint8_t mode)
 	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, value);
 }
 
-float as7265x_get_calibrated_value (int i2c_fd, uint8_t channel, uint8_t device) {
-	return 0.0;
+/**
+ * Read calibrated value (IEEE 754 float)
+ */
+float as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_addr)
+{
+	int i;
+	uint8_t value;
+	uint32_t shift_reg = 0;
+
+	as7265x_device_select(i2c_fd, device);
+
+	for (i = base_addr; i < base_addr+4; i++) {
+		shift_reg <<= 8;
+		value = as7265x_vreg_read(i2c_fd, i);
+fprintf(stderr,"val=%x\n", value);
+		shift_reg |= value;
+	}
+fprintf(stderr,"shift_reg=%x\n", shift_reg);
+	float ret;
+	memcpy (&ret, &shift_reg, sizeof(float));
+fprintf(stderr,"float=%f\n", ret);
+	return ret;
 }
 
 void as7265x_measure(int i2c_fd)
@@ -159,31 +195,8 @@ void as7265x_measure(int i2c_fd)
 
 }
 
-
-static void usage () {
-	fprintf (stderr,"as7265x register [value]\n");
-	fprintf (stderr,"read or write a AS7265X virtual register.\n");
+void as7265x_soft_reset (int i2c_fd) 
+{
+	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, (1<<7));
 }
 
-static void main (int argc, char **argv) {
-
-	int i2c_fd;
-	
-	if (argc < 2) {
-		usage();
-		exit(0);
-	}
-
-	i2c_fd = i2c_init("/dev/i2c-1");
-
-	int reg = atoi(argv[1]);
-
-	if (argc >= 3) {
-		int val = atoi(argv[2]);
-		fprintf (stderr,"writing register %x with %x\n",reg,val);
-		as7265x_vreg_write(i2c_fd,reg,val);
-	} else {
-		fprintf (stderr,"reading as7265x virtual register 0x%x, value=0x%x\n", reg, as7265x_vreg_read(i2c_fd,reg));
-	}
-
-}
