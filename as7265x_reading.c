@@ -15,6 +15,7 @@ void usage () {
 void main (int argc, char **argv) {
 
 	int i2c_fd;
+	int i;
 	
 	if (argc < 2) {
 		usage();
@@ -26,11 +27,16 @@ void main (int argc, char **argv) {
 	as7265x_set_bulb_current (i2c_fd, 2, 1);
 	as7265x_bulb_enable (i2c_fd, 2);
 
-	float f = as7265x_get_calibrated_value(i2c_fd, AS72653_UV, AS7265X_R_G_A_CAL);
+	as7265x_channels_t channels;
 
-	fprintf (stdout, "f=%f\n", f);
+	while (1) {
+		as7265x_get_all_calibrated_values(i2c_fd, &channels);
+		for (i = 0; i < 18; i++) {
+			fprintf (stdout,"%f ", channels.channel[i]);
+		}
+		fprintf(stdout, "\n");	
+	}
 
-	sleep(2);
 	as7265x_soft_reset(i2c_fd);
 
 }

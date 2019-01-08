@@ -93,7 +93,6 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 		if ((status & I2C_AS72XX_SLAVE_RX_VALID)!= 0)
 		// Read data is ready.
 		break;
-		else fprintf(stderr,"[%x] ",status);
 	}
 
 	// Read the data to complete the operation.
@@ -169,16 +168,32 @@ float as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_add
 	for (i = base_addr; i < base_addr+4; i++) {
 		shift_reg <<= 8;
 		value = as7265x_vreg_read(i2c_fd, i);
-fprintf(stderr,"val=%x\n", value);
 		shift_reg |= value;
 	}
-fprintf(stderr,"shift_reg=%x\n", shift_reg);
+	// convert content of shift_reg to floating point
 	float ret;
 	memcpy (&ret, &shift_reg, sizeof(float));
-fprintf(stderr,"float=%f\n", ret);
 	return ret;
 }
 
+void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels)
+{
+
+	uint8_t base_addr;
+	int channel_index = 0;
+	int device;
+	float v;
+
+	for (device = 0; device < 3; device++) {
+		for (base_addr = 0x14; base_addr < 0x2c; base_addr += 4) {	
+			v = as7265x_get_calibrated_value (i2c_fd, device, base_addr);
+//fprintf (stderr,"device=%d base_addr=%x v=%f\n", device, base_addr, v);
+			channels->channel[channel_index] = v;
+			channel_index++;
+		}
+	}
+
+}
 void as7265x_measure(int i2c_fd)
 {
 	int i;
