@@ -34,6 +34,18 @@ void main (int argc, char **argv) {
 
 	as7265x_channels_t channels;
 
+
+	// disable all light sources
+	for (i = 0; i < 3; i++) {
+		as7265x_set_bulb_current(i2c_fd, 0, 0);
+		as7265x_bulb_disable(i2c_fd,i);
+	}
+
+
+	// set one-shot measurement mode
+	//as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
+
+
 	while (1) {
 		as7265x_get_all_calibrated_values(i2c_fd, &channels);
 		as7265x_order_channels(i2c_fd, &channels);

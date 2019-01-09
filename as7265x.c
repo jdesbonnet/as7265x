@@ -135,8 +135,17 @@ void as7265x_bulb_enable (int i2c_fd, uint8_t device)
 	as7265x_device_select(i2c_fd, device);
 
 	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
-	// bit 3: bulb enable
+	// bit 3: bulb en/disable
 	value |= (1 << 3);
+	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
+}
+
+void as7265x_bulb_disable (int i2c_fd, uint8_t device)
+{
+        as7265x_device_select(i2c_fd, device);
+	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+	// bit 3: bulb en/disable
+	value &= ~(1 << 3);
 	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
 }
 
@@ -184,10 +193,18 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 
 	uint8_t base_addr;
 	int channel_index = 0;
-	int device;
+	int i;
+	uint8_t device;
 	float v;
 
-	for (device = 0; device < 3; device++) {
+	const uint8_t device_order[] = { 2 , 0, 1};
+
+	// Interrogate in this order:
+	// AS72643 (UV)
+	// AS72642 (vis+IR)
+	// AS72841 (vis+IR)
+	for (i = 0; i < 3; i++) {
+		device = device_order[i];
 		for (base_addr = 0x14; base_addr < 0x2c; base_addr += 4) {	
 			v = as7265x_get_calibrated_value (i2c_fd, device, base_addr);
 //fprintf (stderr,"device=%d base_addr=%x v=%f\n", device, base_addr, v);
