@@ -1,3 +1,8 @@
+/**
+ * Read all 18 channels and ouput in ascending wavelength order
+ * (channels A, B, C, D, E, F, G, H, R, I, S, J, T, U, V, W, K, L)
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -31,6 +36,7 @@ void main (int argc, char **argv) {
 
 	while (1) {
 		as7265x_get_all_calibrated_values(i2c_fd, &channels);
+		as7265x_order_channels(i2c_fd, &channels);
 		for (i = 0; i < 18; i++) {
 			fprintf (stdout,"%f ", channels.channel[i]);
 		}

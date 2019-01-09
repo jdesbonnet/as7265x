@@ -176,6 +176,9 @@ float as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_add
 	return ret;
 }
 
+/**
+ * Read all 18 channels
+ */
 void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels)
 {
 
@@ -194,6 +197,23 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 	}
 
 }
+
+
+/**
+ * Order channels in ascending wavelength.
+ */
+void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels) 
+{
+	float buf[18];
+	int i;
+	for (i = 0; i < 18; i++) {
+		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+	}
+	for (i = 0; i < 18; i++) {
+		channels->channel[i] = buf[i];
+	}
+}
+
 void as7265x_measure(int i2c_fd)
 {
 	int i;

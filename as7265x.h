@@ -1,6 +1,8 @@
 
 // Code partually copied from Sparkfun Arduino library
 
+#ifndef _AS7265X_H
+#define _AS7265X_H
 
 #define I2C_AS72XX_SLAVE_STATUS_REG 0x00
 #define I2C_AS72XX_SLAVE_WRITE_REG 0x01
@@ -118,6 +120,21 @@ struct {
 	} data;
 } as7265x_channel_union_t;
 
+
+/**
+ * How to reorder channels so that channels are ordered by ascending wavelength.
+ */
+static const uint8_t as7265x_channel_order_table[] =  {
+	0,1,2,3,4,5,  6,7,12,8,13,9,14,15,16,17,10,11
+};
+
+/**
+ * Peak sensitivity frequency of the unordered channels (unit nm).
+ */
+static const int ordered_channel_wavelenth[] = {
+	410, 435, 460, 485, 510, 535, 560, 585, 610, 645, 680, 705, 730, 760, 810, 860, 900, 940
+};
+
 int     as7265x_is_data_available(int i2c_fd);
 void    as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current);
 void    as7265x_bulb_enable(int i2c_fd, uint8_t device);
@@ -128,4 +145,7 @@ void    as7265x_device_select(int i2c_fd, uint8_t device);
 void    as7265x_soft_reset(int i2c_fd);
 float   as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_addr);
 void    as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels);
+void    as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels);
+
+#endif
 
