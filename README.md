@@ -11,6 +11,7 @@ make
 ## Combined sensor spectral response
 
 ![spectral response](./doc/as7265x_spectral_response.png)
+(from AMS AS7265x datasheet)
 
 ## Credits
 
