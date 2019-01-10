@@ -197,7 +197,7 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 	uint8_t device;
 	float v;
 
-	const uint8_t device_order[] = { 2 , 0, 1};
+	const uint8_t device_order[] = { 2, 0 , 1};
 
 	// Interrogate in this order:
 	// AS72643 (UV)
