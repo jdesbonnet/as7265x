@@ -113,6 +113,10 @@ typedef struct as7265x_channels {
 	float channel[18];
 } as7265x_channels_t;
 
+typedef struct as7265x_raw_channels {
+	uint16_t channel[18];
+} as7265x_raw_channels_t;
+
 struct {
 	union {
 		struct as7265x_named_channels named_channels;
@@ -137,6 +141,7 @@ static const int ordered_channel_wavelenth[] = {
 };
 
 int     as7265x_is_data_available(int i2c_fd);
+void    as7265x_set_gain(int i2c_fd, int gain);
 void    as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current);
 void    as7265x_bulb_enable(int i2c_fd, uint8_t device);
 void    as7265x_bulb_disable(int i2c_fd, uint8_t device);
@@ -147,7 +152,9 @@ void    as7265x_device_select(int i2c_fd, uint8_t device);
 void    as7265x_soft_reset(int i2c_fd);
 float   as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_addr);
 void    as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels);
+void    as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels);
 void    as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels);
+void    as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels);
 
 #endif
 

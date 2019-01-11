@@ -24,12 +24,6 @@ int i2cm_write(int i2c_fd, int addr, int value) {
 	i2c_register_write(i2c_fd, 0x49, addr, value);
 }
 
-int as7265x_is_data_available (int i2c_fd)
-{
-	int status = i2cm_read(i2c_fd, I2C_AS72XX_SLAVE_STATUS_REG);
-	return (status & I2C_AS72XX_SLAVE_RX_VALID);
-}
-
 /**
  * Write to AS7265x virtual register
  */
@@ -100,6 +94,12 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 	return d;
 }
 
+int as7265x_is_data_available (int i2c_fd)
+{
+	int status = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
+	return (status & (1<<1) );
+}
+
 /**
  * Select device
  *
@@ -107,6 +107,21 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
  */
 void as7265x_device_select(int i2c_fd, uint8_t device) {
 	as7265x_vreg_write(i2c_fd, AS7265X_DEV_SELECT_CONTROL, device);
+}
+
+
+/**
+ * Set amplifier gain
+
+ * @param gain 0= 1x (default), 1=3.7x, 2=16x, 3=64x
+ */
+void as7265x_set_gain (int i2c_fd, int gain) 
+{
+
+	int value = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
+	value &= 0b11001111; // clear gain bits
+	value |= (gain&0b11) << 4;
+	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG,value);
 }
 
 /**
@@ -156,10 +171,9 @@ void as7265x_bulb_disable (int i2c_fd, uint8_t device)
  */
 void as7265x_set_measurement_mode(int i2c_fd, uint8_t mode) 
 {
-	mode &= 0b11;
 	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
 	value &= 0b11110011;
-	value |= (mode << 2);
+	value |= (mode&0b11) << 2;
 	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, value);
 }
 
@@ -186,6 +200,19 @@ float as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_add
 }
 
 /**
+ * Read raw value (16 bit unsigned integer)
+ */
+int as7265x_get_raw_value (int i2c_fd, uint8_t device, uint8_t base_addr)
+{
+	as7265x_device_select(i2c_fd, device);
+        uint32_t value = (as7265x_vreg_read(i2c_fd, base_addr)<<8);
+	value |= as7265x_vreg_read(i2c_fd,base_addr+1);
+//fprintf(stderr,"raw device %d @ %x = %d\n", device, base_addr, value);
+	return value;
+}
+
+
+/**
  * Read all 18 channels
  */
 void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels)
@@ -207,8 +234,27 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 		device = device_order[i];
 		for (base_addr = 0x14; base_addr < 0x2c; base_addr += 4) {	
 			v = as7265x_get_calibrated_value (i2c_fd, device, base_addr);
-//fprintf (stderr,"device=%d base_addr=%x v=%f\n", device, base_addr, v);
 			channels->channel[channel_index] = v;
+			channel_index++;
+		}
+	}
+
+}
+/**
+ * Read all 18 channels raw ADC
+ */
+
+void as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels) 
+{
+	int i;
+	int base_addr;
+	int device;
+	int channel_index = 0;
+	const uint8_t device_order[] = { 2, 0 , 1};
+	for (i = 0; i < 3; i++) {
+		device = device_order[i];
+		for (base_addr = 0x8; base_addr < 0x14; base_addr += 2) {
+			channels->channel[channel_index] = (uint16_t)as7265x_get_raw_value(i2c_fd, device, base_addr);	
 			channel_index++;
 		}
 	}
@@ -230,6 +276,20 @@ void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels)
 		channels->channel[i] = buf[i];
 	}
 }
+
+void as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels) 
+{
+
+	uint16_t buf[18];
+	int i;
+	for (i = 0; i < 18; i++) {
+		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+	}
+	for (i = 0; i < 18; i++) {
+		channels->channel[i] = buf[i];
+	}
+}
+
 
 void as7265x_measure(int i2c_fd)
 {

@@ -33,6 +33,7 @@ void main (int argc, char **argv) {
 	as7265x_bulb_enable (i2c_fd, 2);
 
 	as7265x_channels_t channels;
+	as7265x_raw_channels_t raw_channels;
 
 
 	// disable all light sources
@@ -46,13 +47,27 @@ void main (int argc, char **argv) {
 	//as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
 
 
+	as7265x_set_gain (i2c_fd, AS7265X_GAIN_64X);
+
 	while (1) {
-		as7265x_get_all_calibrated_values(i2c_fd, &channels);
-		as7265x_order_channels(i2c_fd, &channels);
+		as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
+
+		while ( ! as7265x_is_data_available(i2c_fd) ) {
+		}
+
+		//as7265x_get_all_calibrated_values(i2c_fd, &channels);
+		//as7265x_order_channels(i2c_fd, &channels);
+		as7265x_get_all_raw_values(i2c_fd, &raw_channels);
+		as7265x_order_raw_channels(i2c_fd, &raw_channels);
+		
 		for (i = 0; i < 18; i++) {
-			fprintf (stdout,"%f ", channels.channel[i]);
+			//fprintf (stdout,"%f ", channels.channel[i]);
+			fprintf (stdout, "%d ", (int)raw_channels.channel[i]);
 		}
 		fprintf(stdout, "\n");	
+		fflush(stdout);
+
+		sleep(1);
 	}
 
 	as7265x_soft_reset(i2c_fd);
