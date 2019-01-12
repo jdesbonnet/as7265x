@@ -1,3 +1,12 @@
+/**
+ * AS7265x triad spectroscopic sensor I2C library.
+ * 
+ * See https://ams.com/as7265x for sensor datasheet.
+
+ * Most recent code from:
+ * https://github.com/jdesbonnet/as7265x 
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -6,6 +15,7 @@
 #include "i2c.h"
 #include "as7265x.h"
 
+#define AS7265X_I2C_ADDR 0x49
 
 
 /**
@@ -13,7 +23,7 @@
  */
 int i2cm_read(int i2c_fd, int addr) {
 	uint8_t result;
-	i2c_register_read(i2c_fd, 0x49, addr, &result);
+	i2c_register_read(i2c_fd, AS7265X_I2C_ADDR, addr, &result);
 	return result;
 } 
 
@@ -21,11 +31,11 @@ int i2cm_read(int i2c_fd, int addr) {
  * Write a I2C (real) register to AS7265x.
  */
 int i2cm_write(int i2c_fd, int addr, int value) {
-	i2c_register_write(i2c_fd, 0x49, addr, value);
+	i2c_register_write(i2c_fd, AS7265X_I2C_ADDR, addr, value);
 }
 
 /**
- * Write to AS7265x virtual register
+ * Write to AS7265x virtual register. Based on code in the AS7265x datasheet.
  */
 void as7265x_vreg_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 {
@@ -53,7 +63,7 @@ void as7265x_vreg_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 }
 
 /**
- * Read from AS7265x virtual register 
+ * Read from AS7265x virtual register. Based on code in the AS7265x datasheet. 
  */
 uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 {
@@ -94,6 +104,11 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 	return d;
 }
 
+/**
+ * Test DATA_RDY flag of configuration virtual register (add
+ *
+ * @return 0 if not set, non-zero if set.
+ */
 int as7265x_is_data_available (int i2c_fd)
 {
 	int status = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
