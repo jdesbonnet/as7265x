@@ -54,11 +54,13 @@ int main (int argc, char **argv)
 	}
 
 
+	adjust *= 255;
+
 	red *= adjust;
 	green *= adjust;
 	blue *= adjust;
 
-	printf ("%f %f %f\n", red, green, blue);
+	printf ("%f %f %f #%02x%02x%02x\n", red, green, blue, (int)red, (int)green, (int)blue);
 
 }
 
