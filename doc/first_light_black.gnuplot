@@ -1,8 +1,8 @@
 set title "AS7265x first light: several hours diffuse cloudy daylight (dawn to early morning, 2019-01-11)\nhttps://github.com/jdesbonnet/as7265x" textcolor rgb 'white' font ",24"
 
-set ylabel "time (arbitary)" textcolor rgb 'white' font ",18"
-set cblabel "ADC counts (arbitary)" textcolor rgb 'white' font ",18"
-set xlabel "AS7265x channels A (410nm), B, C, D, E, F, G, H, R (610nm), I, S, J, T, U, V, W, K, L (940nm)" textcolor rgb 'white' font ",18"
+set ylabel "time (arbitary)" textcolor rgb 'white' font ",24" offset -1
+set cblabel "ADC counts (arbitary)" textcolor rgb 'white' font ",24" offset +1
+set xlabel "AS7265x channels (raw ADC): A (410nm), B, C, D, E, F, G, H, R (610nm), I, S, J, T, U, V, W, K, L (940nm)" textcolor rgb 'white' font ",24" offset 0,-0.5
 
 set xrange [-.5:17.5]
 set yrange [0:*]
@@ -16,6 +16,8 @@ set key textcolor rgb 'white'
 
 unset xtics
 unset ytics
+set lmargin at screen 0.05
+set bmargin at screen 0.05
 
 set terminal pngcairo size 1920,1080 background rgb 'black' 
 set output "as7265x_first_light.png"
