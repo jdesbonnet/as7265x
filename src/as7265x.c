@@ -140,6 +140,16 @@ void as7265x_set_gain (int i2c_fd, int gain)
 }
 
 /**
+ * Set ADC integration time. 
+ *
+ * @param time from 1..255. 2.8ms units.
+ */
+void as7265x_set_integration_time(int i2c_fd, uint8_t time)
+{
+	as7265x_vreg_write(i2c_fd, AS7265X_INTERGRATION_TIME, time);
+}
+
+/**
  * Set bulb current.
  *
  * @param device 0, 1, or 2

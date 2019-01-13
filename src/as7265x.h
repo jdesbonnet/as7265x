@@ -141,6 +141,7 @@ static const int ordered_channel_wavelenth[] = {
 
 int     as7265x_is_data_available(int i2c_fd);
 void    as7265x_set_gain(int i2c_fd, int gain);
+void    as7265x_set_integration_time(int i2c_fd, uint8_t time);
 void    as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current);
 void    as7265x_bulb_enable(int i2c_fd, uint8_t device);
 void    as7265x_bulb_disable(int i2c_fd, uint8_t device);
