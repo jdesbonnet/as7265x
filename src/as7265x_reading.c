@@ -22,11 +22,6 @@ void main (int argc, char **argv) {
 	int i2c_fd;
 	int i;
 	
-	if (argc < 2) {
-		usage();
-		//exit(0);
-	}
-
 	i2c_fd = i2c_init("/dev/i2c-1");
 
 	as7265x_set_bulb_current (i2c_fd, 2, 1);
@@ -38,7 +33,7 @@ void main (int argc, char **argv) {
 
 	// disable all light sources
 	for (i = 0; i < 3; i++) {
-		as7265x_set_bulb_current(i2c_fd, 0, 0);
+		//as7265x_set_bulb_current(i2c_fd, 0, 0);
 		as7265x_bulb_disable(i2c_fd,i);
 	}
 
@@ -53,6 +48,7 @@ void main (int argc, char **argv) {
 		as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
 
 		while ( ! as7265x_is_data_available(i2c_fd) ) {
+			usleep(1000);
 		}
 
 		//as7265x_get_all_calibrated_values(i2c_fd, &channels);
