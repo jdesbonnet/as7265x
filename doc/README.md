@@ -41,6 +41,10 @@ V, A, 8 x adc, 8 x calib
 8.0 0.470  65535 65535 65535 65535 65535 65535     4294967296.000 4294967296.000 4294967296.000 4294967296.000 4294967296.000 4294967296.000 
 
 
+Need to automate this. 
+Can program Rigol DP832 to ramp up the lamp drive current. See https://github.com/hollanderic/dp832 for a little utility 
+that can be adapted for this purpose.
+ 
 
 2019-01-11
 

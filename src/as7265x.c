@@ -222,31 +222,23 @@ int as7265x_get_raw_value (int i2c_fd, uint8_t device, uint8_t base_addr)
 	as7265x_device_select(i2c_fd, device);
         uint32_t value = (as7265x_vreg_read(i2c_fd, base_addr)<<8);
 	value |= as7265x_vreg_read(i2c_fd,base_addr+1);
-//fprintf(stderr,"raw device %d @ %x = %d\n", device, base_addr, value);
 	return value;
 }
 
 
 /**
- * Read all 18 channels
+ * Read all 18 channels. Channels AS72651 (vis): channels 0-5, AS72652 (vis+IR): channels 6-11,
+ * AS72653 (vis+UV): channels 12-17.
  */
 void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels)
 {
 
 	uint8_t base_addr;
 	int channel_index = 0;
-	int i;
 	uint8_t device;
 	float v;
 
-	const uint8_t device_order[] = { 2, 0 , 1};
-
-	// Interrogate in this order:
-	// AS72643 (UV)
-	// AS72642 (vis+IR)
-	// AS72841 (vis+IR)
-	for (i = 0; i < 3; i++) {
-		device = device_order[i];
+	for (device = 0; device < 3; device++) {
 		for (base_addr = 0x14; base_addr < 0x2c; base_addr += 4) {	
 			v = as7265x_get_calibrated_value (i2c_fd, device, base_addr);
 			channels->channel[channel_index] = v;
@@ -256,18 +248,16 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 
 }
 /**
- * Read all 18 channels raw ADC
+ * Read all 18 channels raw ADC. Channels AS72651 (vis): channels 0-5, AS72652 (vis+IR): channels 6-11,
+ * AS72653 (vis+UV): channels 12-17
  */
 
 void as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels) 
 {
-	int i;
 	int base_addr;
 	int device;
 	int channel_index = 0;
-	const uint8_t device_order[] = { 2, 0 , 1};
-	for (i = 0; i < 3; i++) {
-		device = device_order[i];
+	for (device = 0; device < 3; device++) {
 		for (base_addr = 0x8; base_addr < 0x14; base_addr += 2) {
 			channels->channel[channel_index] = (uint16_t)as7265x_get_raw_value(i2c_fd, device, base_addr);	
 			channel_index++;

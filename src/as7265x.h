@@ -129,8 +129,7 @@ struct {
  * How to reorder channels so that channels are ordered by ascending wavelength.
  */
 static const uint8_t as7265x_channel_order_table[] =  {
-	//0,1,2,3,4,5,  6,7,12,8,13,9,14,15,16,17,10,11
-	0,1,2,3,4,5,  12,13, 6, 14, 7, 15, 8,9,10,11, 16,17
+	12,13,14,15,16,17,    6,7,0,8,1,9,2,3,4,5,10,11
 };
 
 /**
