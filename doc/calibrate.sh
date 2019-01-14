@@ -2,7 +2,7 @@
 
 DP832=/dev/usbtmc1
 
-for v in $(seq 0 1.0 12); do
+for v in $(seq 0 0.5 12); do
 	echo -n ":SOUR1:VOLT:IMM ${v}" > ${DP832}
 	sleep 1
 	echo -n ":MEAS:CURR? CH1" > ${DP832}

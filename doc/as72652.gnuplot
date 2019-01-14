@@ -1,10 +1,8 @@
-set log y
-set key at graph 0.3, 0.9
 
-Rleads = 0.135
-Ksb = 3.477E-13
+set title "AS72652 sensitivity curve"
 
 load 'black_body_radiator.gnuplot'
+load 'as7265x_common.gnuplot'
  
 f(Vpsu,Ipsu) = bulb_T(Vpsu,Ipsu)
 
