@@ -1,11 +1,20 @@
 /**
  * Human cone spectral sensitivities (2 degree) or cone fundamentals. The Stockman & Sharpe (2000).
  * Downloaded as CSV file from http://www.cvrl.org/
+ *
+ * "The spectral sensitivities of the middle- and long-wavelength-sensitive cones derived from measurements in observers of known genotype"
+ * AndrewStock, Lindsay T.Sharpe
+ *  https://doi.org/10.1016/S0042-6989(00)00021-3
+ * (available free online)
  * 
  * wavelength (nm), relative senstivies of L (long/red), M (medium/green), S (short/blue) cones.
  * 
  * Joe Desbonnet.
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 double stockman_sharpe_table[] = {
 390,  4.15003E-04,  3.68349E-04,  9.54729E-03,
@@ -99,3 +108,45 @@ double stockman_sharpe_table[] = {
 830,  9.74306E-07,  9.53411E-08, 0
 };
 
+int stockman_sharpe (double wavelength, double *red, double *green, double *blue) {
+
+	wavelength = floor((wavelength+2.5)/5.0)  * 5.0;
+
+	int l = 0;
+	int r = sizeof (stockman_sharpe_table) / (4 * sizeof(double));
+	int m;
+
+	while (l <= r) { 
+ 		int m = l + (r - l) / 2;
+
+		if (stockman_sharpe_table[m*4] == wavelength) {
+			*red = stockman_sharpe_table[m*4+1];
+			*green = stockman_sharpe_table[m*4+2];
+			*blue = stockman_sharpe_table[m*4+3];
+			return 0;
+		}
+
+		// If x greater, ignore left half
+		if (stockman_sharpe_table[m*4] < wavelength) {
+			l = m + 1; // ignore lower half
+  		} else {
+			r = m - 1; // ignore upper half
+		}
+	}
+	// no hit
+	return -1;
+} 
+  
+
+
+int main (int argc, char **argv) {
+	double red, green, blue;
+	double wavelength = atof(argv[1]);
+
+	if ( stockman_sharpe(wavelength, &red, &green, &blue) != -1) {
+
+		printf ("%fnm R=%f G=%f B=%f\n", wavelength, red, green, blue);
+	} else {
+		printf ("%fnm not found\n",wavelength);
+	}
+}
