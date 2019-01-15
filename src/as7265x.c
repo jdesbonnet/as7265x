@@ -327,3 +327,25 @@ void as7265x_soft_reset (int i2c_fd)
 	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, (1<<7));
 }
 
+
+as7265x_wavelengths_t as7265x_get_unordered_channel_wavelengths (void)
+{
+	int i = 0;
+	as7265x_wavelengths_t ret;
+	for (i = 0; i < 18; i++) {
+		ret.channel[i] = as7265x_unordered_channel_wavelength[i];
+	}
+	// TODO: is this allowed in C?
+	return ret;
+}
+
+as7265x_wavelengths_t as7265x_get_ordered_channel_wavelengths (void)
+{
+	int i = 0;
+	as7265x_wavelengths_t ret;
+	for (i = 0; i < 18; i++) {
+		ret.channel[i] = as7265x_unordered_channel_wavelength[i];
+	}
+	return ret;
+}
+

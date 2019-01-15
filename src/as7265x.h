@@ -117,6 +117,10 @@ typedef struct as7265x_raw_channels {
 	uint16_t channel[18];
 } as7265x_raw_channels_t;
 
+typedef struct as7265x_wavelengths {
+	int channel[18];
+} as7265x_wavelengths_t;
+
 struct {
 	union {
 		struct as7265x_named_channels named_channels;
@@ -127,15 +131,26 @@ struct {
 
 /**
  * How to reorder channels so that channels are ordered by ascending wavelength.
+ * The input order is assumed to be the AS72651 channels, followed by AS72652
+ * and finally the AS72653 channels. Ie channels
+ * R,S,T,U,V,W,   G,H,I,J,K,L,  A,B,C,D,E,F.  Output channel order is
+ * A,B,C,D,E,F, G,H, R, I, S, J, T,U,V,W, K,L.
  */
 static const uint8_t as7265x_channel_order_table[] =  {
 	12,13,14,15,16,17,    6,7,0,8,1,9,2,3,4,5,10,11
 };
 
 /**
- * Peak sensitivity frequency of the unordered channels (unit nm).
+ * Peak sensitivity frequency of the unordered channels (unit nm)
  */
-static const int ordered_channel_wavelenth[] = {
+static const int as7265x_unordered_channel_wavelength[] = {
+	610, 680, 730, 760, 810, 860,  560, 585, 645, 705, 900, 940, 410, 435, 460, 485, 510, 535
+};
+
+/**
+ * Peak sensitivity frequency of the wavelength ascending ordered channels (unit nm).
+ */
+static const int as7265x_ordered_channel_wavelenth[] = {
 	410, 435, 460, 485, 510, 535, 560, 585, 610, 645, 680, 705, 730, 760, 810, 860, 900, 940
 };
 
@@ -155,6 +170,8 @@ void    as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *chann
 void    as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels);
 void    as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels);
 void    as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels);
+as7265x_wavelengths_t    as7265x_get_unordered_channel_wavelengths();
+as7265x_wavelengths_t    as7265x_get_ordered_channel_wavelengths();
 
 #endif
 
