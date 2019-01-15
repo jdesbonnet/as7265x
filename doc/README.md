@@ -1,5 +1,15 @@
 # Notes
 
+## 2019-01-15
+
+gcc -I ../src -o estimate_rgb  estimate_rgb.c ../src/as7265x.c ../src/i2c.c ./stockman_sharpe.c -lm
+
+Test with banana:
+
+echo " 14126 4527 1598 1110 2898 6069 1758 2312 1963 689 3168 687 2196 639 1079 636 1552 4865" | ./estimate_rgb 
+
+
+
 ## 2019-01-14
 
 Numerical models of eye color senstivity:

@@ -139,14 +139,3 @@ int stockman_sharpe (double wavelength, double *red, double *green, double *blue
   
 
 
-int main (int argc, char **argv) {
-	double red, green, blue;
-	double wavelength = atof(argv[1]);
-
-	if ( stockman_sharpe(wavelength, &red, &green, &blue) != -1) {
-
-		printf ("%fnm R=%f G=%f B=%f\n", wavelength, red, green, blue);
-	} else {
-		printf ("%fnm not found\n",wavelength);
-	}
-}
