@@ -1,5 +1,63 @@
 # Notes
 
+## 2019-01-14
+
+Numerical models of eye color senstivity:
+http://www.cvrl.org/
+
+Human eye cones linear response: 
+linss2_10e_fine.csv
+
+
+Human cone spectral sensitivities (2 degree) or cone fundamentals. The Stockman & Sharpe (2000).
+Downloaded as CSV file from http://www.cvrl.org/
+"The spectral sensitivities of the middle- and long-wavelength-sensitive cones derived from measurements in observers of known genotype"
+AndrewStock, Lindsay T.Sharpe
+https://doi.org/10.1016/S0042-6989(00)00021-3
+(available free online)
+
+
+
+
+## 2019-01-13
+
+Experimental setup
+
+12V incadescent bulb is placed at the bottom of a steel can. 
+It is covered with white tissue paper which acts as a diffuser.
+The lamp is powered by a Rigol DP832 PSU.
+
+The resistence of the leads is measured by measuring the short
+circuit current. This wa found to be 0.591A at 0.08V. Ie R=0.135 ohms.
+Lead resistence is used in the bulb power calculation.
+
+The AS7268x (Sparkfun SKU ???) is taped to the lid.
+
+calibrate.sh  ramps up the current through the bulb. A AS7265x
+reading is taken at each  current increment.
+
+Power is calculated by multiplying the bulb current (measured by the DP832) 
+with the PSU voltage (measured by the DP832) minus a correction factor to
+allow for the voltage drop on the leads.
+
+Bulb temperature derivation:
+
+The current is ramped up from zero until a faint glow is noticed. This is
+the Draper point at 795K. It is hard to know exactly when this point is
+reached, so there is some uncertainty about this value. It was found to 
+be Ibulb=0.175A, Vpsu=0.831. In theory this datapoint can be used to derive temperature
+from bulb power (ie Vbulb x Ibulb).
+
+Pbulb = Ksb * T ^ 4
+
+(Vpsu*Ipsu - Ipsu*Ipsu*Rleads) = Ksb * 798 ^ 4
+
+Ksb = 0.141 / 798^4 = 3.477E-13
+
+Tbulb = ((Vpsu*Ipsu - Ipsu*Ipsu*Rleads)/Ksb) ^ 0.25
+
+
+
 ## 2019-01-12
 
 Some calibration experiments on the AS72651 (vis) sensor. Using incadescent halogen bulb. Nominally rated at 12V. 
