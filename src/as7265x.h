@@ -135,7 +135,7 @@ static const uint8_t as7265x_channel_order_table[] =  {
 /**
  * Peak sensitivity frequency of the unordered channels (unit nm).
  */
-static const int ordered_channel_wavelenth[] = {
+static const int as7265x_ordered_channel_wavelength[] = {
 	410, 435, 460, 485, 510, 535, 560, 585, 610, 645, 680, 705, 730, 760, 810, 860, 900, 940
 };
 
@@ -145,6 +145,8 @@ void    as7265x_set_integration_time(int i2c_fd, uint8_t time);
 void    as7265x_set_bulb_current(int i2c_fd, uint8_t device, uint8_t current);
 void    as7265x_bulb_enable(int i2c_fd, uint8_t device);
 void    as7265x_bulb_disable(int i2c_fd, uint8_t device);
+void    as7265x_indicator_enable(int i2c_fd);
+void    as7265x_indicator_disable(int i2c_fd);
 void    as7265x_vreg_write(int i2c_fd, uint8_t vreg, uint8_t value);
 uint8_t as7265x_vreg_read(int i2c_fd, uint8_t vreg);
 void    as7265x_set_measurement_mode(int i2c_fd, uint8_t mode);
@@ -153,7 +155,7 @@ void    as7265x_soft_reset(int i2c_fd);
 float   as7265x_get_calibrated_value (int i2c_fd, uint8_t device, uint8_t base_addr);
 void    as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels);
 void    as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels);
-void    as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels);
+void    as7265x_order_calibrated_channels(int i2c_fd, as7265x_channels_t *channels);
 void    as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels);
 
 #endif

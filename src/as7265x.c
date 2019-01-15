@@ -189,6 +189,22 @@ void as7265x_bulb_disable (int i2c_fd, uint8_t device)
 	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
 }
 
+void as7265x_indicator_enable (int i2c_fd) 
+{
+	as7265x_device_select(i2c_fd, 0);
+	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+	value |= (1<<0);
+	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
+}
+
+void as7265x_indicator_disable (int i2c_fd) 
+{
+        as7265x_device_select(i2c_fd, 0);
+        uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+        value &= ~(1<<0);
+        as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
+}
+
 /**
  * Set measurement mode.
  * 
@@ -280,12 +296,12 @@ void as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels)
 /**
  * Order channels in ascending wavelength.
  */
-void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels) 
+void as7265x_order_calibrated_channels(int i2c_fd, as7265x_channels_t *channels) 
 {
 	float buf[18];
 	int i;
 	for (i = 0; i < 18; i++) {
-		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+		buf[i] = channels->channel[as7265x_channel_order_table[i]];
 	}
 	for (i = 0; i < 18; i++) {
 		channels->channel[i] = buf[i];
@@ -294,11 +310,10 @@ void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels)
 
 void as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels) 
 {
-
 	uint16_t buf[18];
 	int i;
 	for (i = 0; i < 18; i++) {
-		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+		buf[i] = channels->channel[as7265x_channel_order_table[i]];
 	}
 	for (i = 0; i < 18; i++) {
 		channels->channel[i] = buf[i];
