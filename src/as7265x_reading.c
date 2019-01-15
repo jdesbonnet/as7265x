@@ -43,6 +43,7 @@ void main (int argc, char **argv) {
 
 
 	as7265x_set_gain (i2c_fd, AS7265X_GAIN_64X);
+	as7265x_set_integration_time (i2c_fd, 200);
 
 	while (1) {
 		as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
