@@ -1,23 +1,27 @@
 set grid
 set log y
 
-plot 'banana_timeseries.dat' using 1:3 with linespoints title '610nm', \
-  '' using 1:4 with linespoints title '680nm', \
-  '' using 1:5 with linespoints title '730nm', \
-  '' using 1:6 with linespoints title '760nm', \
-  '' using 1:7 with linespoints title '810nm', \
-  '' using 1:8 with linespoints title '860nm', \
-  '' using 1:9 with linespoints title '560nm', \
-  '' using 1:10 with linespoints title '585nm', \
-  '' using 1:11 with linespoints title '645nm', \
-  '' using 1:12 with linespoints title '705nm', \
-  '' using 1:13 with linespoints title '900nm', \
-  '' using 1:14 with linespoints title '940nm', \
-  '' using 1:15 with linespoints title '410nm', \
-  '' using 1:16 with linespoints title '435nm', \
-  '' using 1:17 with linespoints title '460nm', \
-  '' using 1:18 with linespoints title '485nm', \
-  '' using 1:19 with linespoints title "510nm", \
-  '' using 1:20 with linespoints title '535nm'
+datafile="banana_timeseries.dat"
+
+plot \
+  datafile \
+     using 1:21 with linespoints title 'AS72651 R 610nm' linecolor rgb "#ff08900", \
+  '' using 1:22 with linespoints title 'AS72651 S 680nm' linecolor rgb '#ff0000', \
+  '' using 1:23 with linespoints title 'AS72651 T 730nm' linecolor rgb '#bc0000', \
+  '' using 1:24 with linespoints title 'AS72651 U 760nm' linecolor rgb '#790000', \
+  '' using 1:25 with linespoints title 'AS72651 V 810nm' linecolor rgb '#000000', \
+  '' using 1:26 with linespoints title 'AS72651 W 860nm' linecolor rgb '#000000', \
+  '' using 1:27 with linespoints title 'AS72652 G 560nm' linecolor rgb '#bcff00', \
+  '' using 1:28 with linespoints title 'AS72652 H 585nm' linecolor rgb '#ffeb00', \
+  '' using 1:29 with linespoints title 'AS72652 I 645nm' linecolor rgb '#ff0000', \
+  '' using 1:30 with linespoints title 'AS72652 J 705nm' linecolor rgb '#f30000', \
+  '' using 1:31 with linespoints title 'AS72652 K 900nm' linecolor rgb '#000000', \
+  '' using 1:32 with linespoints title 'AS72652 L 940nm' linecolor rgb '#000000', \
+  '' using 1:33 with linespoints title 'AS72653 A 410nm' linecolor rgb '#6900d2', \
+  '' using 1:34 with linespoints title 'AS72653 B 435nm' linecolor rgb '#1500ff', \
+  '' using 1:35 with linespoints title 'AS72653 C 460nm' linecolor rgb '#0066ff', \
+  '' using 1:36 with linespoints title 'AS72653 D 485nm' linecolor rgb '#00e5ff', \
+  '' using 1:37 with linespoints title 'AS72653 E 510nm' linecolor rgb '#00ff00', \
+  '' using 1:38 with linespoints title 'AS72653 F 535nm' linecolor rgb '#5bff00'
 
 pause -1
