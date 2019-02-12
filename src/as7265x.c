@@ -1,3 +1,12 @@
+/**
+ * AS7265x triad spectroscopic sensor I2C library.
+ * 
+ * See https://ams.com/as7265x for sensor datasheet.
+
+ * Most recent code from:
+ * https://github.com/jdesbonnet/as7265x 
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -6,6 +15,7 @@
 #include "i2c.h"
 #include "as7265x.h"
 
+#define AS7265X_I2C_ADDR 0x49
 
 
 /**
@@ -13,7 +23,7 @@
  */
 int i2cm_read(int i2c_fd, int addr) {
 	uint8_t result;
-	i2c_register_read(i2c_fd, 0x49, addr, &result);
+	i2c_register_read(i2c_fd, AS7265X_I2C_ADDR, addr, &result);
 	return result;
 } 
 
@@ -21,11 +31,11 @@ int i2cm_read(int i2c_fd, int addr) {
  * Write a I2C (real) register to AS7265x.
  */
 int i2cm_write(int i2c_fd, int addr, int value) {
-	i2c_register_write(i2c_fd, 0x49, addr, value);
+	i2c_register_write(i2c_fd, AS7265X_I2C_ADDR, addr, value);
 }
 
 /**
- * Write to AS7265x virtual register
+ * Write to AS7265x virtual register. Based on code in the AS7265x datasheet.
  */
 void as7265x_vreg_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 {
@@ -53,7 +63,7 @@ void as7265x_vreg_write(int i2c_fd, uint8_t virtualReg, uint8_t d)
 }
 
 /**
- * Read from AS7265x virtual register 
+ * Read from AS7265x virtual register. Based on code in the AS7265x datasheet. 
  */
 uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 {
@@ -94,6 +104,11 @@ uint8_t as7265x_vreg_read(int i2c_fd, uint8_t virtualReg)
 	return d;
 }
 
+/**
+ * Test DATA_RDY flag of configuration virtual register (add
+ *
+ * @return 0 if not set, non-zero if set.
+ */
 int as7265x_is_data_available (int i2c_fd)
 {
 	int status = as7265x_vreg_read(i2c_fd, AS7265X_CONFIG);
@@ -122,6 +137,16 @@ void as7265x_set_gain (int i2c_fd, int gain)
 	value &= 0b11001111; // clear gain bits
 	value |= (gain&0b11) << 4;
 	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG,value);
+}
+
+/**
+ * Set ADC integration time. 
+ *
+ * @param time from 1..255. 2.8ms units.
+ */
+void as7265x_set_integration_time(int i2c_fd, uint8_t time)
+{
+	as7265x_vreg_write(i2c_fd, AS7265X_INTERGRATION_TIME, time);
 }
 
 /**
@@ -162,6 +187,22 @@ void as7265x_bulb_disable (int i2c_fd, uint8_t device)
 	// bit 3: bulb en/disable
 	value &= ~(1 << 3);
 	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
+}
+
+void as7265x_indicator_enable (int i2c_fd) 
+{
+	as7265x_device_select(i2c_fd, 0);
+	uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+	value |= (1<<0);
+	as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
+}
+
+void as7265x_indicator_disable (int i2c_fd) 
+{
+        as7265x_device_select(i2c_fd, 0);
+        uint8_t value = as7265x_vreg_read(i2c_fd, AS7265X_LED_CONFIG);
+        value &= ~(1<<0);
+        as7265x_vreg_write(i2c_fd, AS7265X_LED_CONFIG, value);
 }
 
 /**
@@ -207,31 +248,23 @@ int as7265x_get_raw_value (int i2c_fd, uint8_t device, uint8_t base_addr)
 	as7265x_device_select(i2c_fd, device);
         uint32_t value = (as7265x_vreg_read(i2c_fd, base_addr)<<8);
 	value |= as7265x_vreg_read(i2c_fd,base_addr+1);
-//fprintf(stderr,"raw device %d @ %x = %d\n", device, base_addr, value);
 	return value;
 }
 
 
 /**
- * Read all 18 channels
+ * Read all 18 channels. Channels AS72651 (vis): channels 0-5, AS72652 (vis+IR): channels 6-11,
+ * AS72653 (vis+UV): channels 12-17.
  */
 void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels)
 {
 
 	uint8_t base_addr;
 	int channel_index = 0;
-	int i;
 	uint8_t device;
 	float v;
 
-	const uint8_t device_order[] = { 2, 0 , 1};
-
-	// Interrogate in this order:
-	// AS72643 (UV)
-	// AS72642 (vis+IR)
-	// AS72841 (vis+IR)
-	for (i = 0; i < 3; i++) {
-		device = device_order[i];
+	for (device = 0; device < 3; device++) {
 		for (base_addr = 0x14; base_addr < 0x2c; base_addr += 4) {	
 			v = as7265x_get_calibrated_value (i2c_fd, device, base_addr);
 			channels->channel[channel_index] = v;
@@ -241,18 +274,16 @@ void as7265x_get_all_calibrated_values (int i2c_fd, as7265x_channels_t *channels
 
 }
 /**
- * Read all 18 channels raw ADC
+ * Read all 18 channels raw ADC. Channels AS72651 (vis): channels 0-5, AS72652 (vis+IR): channels 6-11,
+ * AS72653 (vis+UV): channels 12-17
  */
 
 void as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels) 
 {
-	int i;
 	int base_addr;
 	int device;
 	int channel_index = 0;
-	const uint8_t device_order[] = { 2, 0 , 1};
-	for (i = 0; i < 3; i++) {
-		device = device_order[i];
+	for (device = 0; device < 3; device++) {
 		for (base_addr = 0x8; base_addr < 0x14; base_addr += 2) {
 			channels->channel[channel_index] = (uint16_t)as7265x_get_raw_value(i2c_fd, device, base_addr);	
 			channel_index++;
@@ -265,12 +296,12 @@ void as7265x_get_all_raw_values (int i2c_fd, as7265x_raw_channels_t *channels)
 /**
  * Order channels in ascending wavelength.
  */
-void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels) 
+void as7265x_order_calibrated_channels(int i2c_fd, as7265x_channels_t *channels) 
 {
 	float buf[18];
 	int i;
 	for (i = 0; i < 18; i++) {
-		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+		buf[i] = channels->channel[as7265x_channel_order_table[i]];
 	}
 	for (i = 0; i < 18; i++) {
 		channels->channel[i] = buf[i];
@@ -279,11 +310,10 @@ void as7265x_order_channels(int i2c_fd, as7265x_channels_t *channels)
 
 void as7265x_order_raw_channels(int i2c_fd, as7265x_raw_channels_t *channels) 
 {
-
 	uint16_t buf[18];
 	int i;
 	for (i = 0; i < 18; i++) {
-		buf[as7265x_channel_order_table[i]] = channels->channel[i];
+		buf[i] = channels->channel[as7265x_channel_order_table[i]];
 	}
 	for (i = 0; i < 18; i++) {
 		channels->channel[i] = buf[i];
@@ -310,5 +340,27 @@ void as7265x_measure(int i2c_fd)
 void as7265x_soft_reset (int i2c_fd) 
 {
 	as7265x_vreg_write(i2c_fd, AS7265X_CONFIG, (1<<7));
+}
+
+
+as7265x_wavelengths_t as7265x_get_unordered_channel_wavelengths (void)
+{
+	int i = 0;
+	as7265x_wavelengths_t ret;
+	for (i = 0; i < 18; i++) {
+		ret.channel[i] = as7265x_unordered_channel_wavelength[i];
+	}
+	// TODO: is this allowed in C?
+	return ret;
+}
+
+as7265x_wavelengths_t as7265x_get_ordered_channel_wavelengths (void)
+{
+	int i = 0;
+	as7265x_wavelengths_t ret;
+	for (i = 0; i < 18; i++) {
+		ret.channel[i] = as7265x_unordered_channel_wavelength[i];
+	}
+	return ret;
 }
 
