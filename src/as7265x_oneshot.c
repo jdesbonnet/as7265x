@@ -15,12 +15,18 @@
 #include "i2c.h"
 #include "as7265x.h"
 
+#define FORMAT_COLUMN 1
+#define FORMAT_ROW 2
 
 void usage () {
-	fprintf (stderr,"as7265x_reading bulb0_current bulb1_current bulb2_current gain integration_time\n");
-	fprintf (stderr,"bulbn_current: 0 - 4\n"); 
-	fprintf (stderr,"gain: 0 - 3\n");
-	fprintf (stderr,"integration_time: 1 - 255 in 2.8ms units\n");
+	fprintf (stderr,"as7265x_util -d <device> [options]\n");
+	fprintf (stderr," -a bulb0 current 0 - 4\n");
+	fprintf (stderr," -b bulb1 current 0 - 4\n");
+	fprintf (stderr," -c bulb2 current 0 - 4\n");
+	fprintf (stderr," -f format: c=column, r=row\n");
+	fprintf (stderr," -g gain 0 - 3\n");
+	fprintf (stderr," -i integration_time: 1 - 255 in 2.8ms units\n");
+	fprintf (stderr," -p sampling period ms\n");
 }
 
 void main (int argc, char **argv) {
@@ -29,18 +35,66 @@ void main (int argc, char **argv) {
 	int i;
 	
 	int bulb_current[3];
+	int gain;
+	int integ_time;
+	int output_format;
 
-	if (argc < 6) {
-		usage();
-		exit(-1);
-	}
+	// Sampling period (ms)
+	int period = -1;
 
-	bulb_current[0] = atoi(argv[1]);
-	bulb_current[1] = atoi(argv[2]);
-	bulb_current[2] = atoi(argv[3]);
+	char *device = "/dev/i2c-1";
 
-	int gain = atoi(argv[4]);
-	int integ_time = atoi(argv[5]);
+
+	// Parse command line arguments. See usage() for details.
+	int c;
+	while ((c = getopt(argc, argv, "a:b:c:d:f:g:hi:o:p:qs:tv")) != -1) {
+		switch(c) {
+
+			case 'a':
+				bulb_current[0] = atoi (optarg);
+				break;
+			case 'b':
+				bulb_current[1] = atoi (optarg);
+				break;
+			case 'c':
+				bulb_current[2] = atoi (optarg);
+				break;
+
+
+			case 'd':
+				device = optarg;
+				break;
+
+			case 'f':
+				if (optarg[0] == 'c') {
+					output_format = FORMAT_COLUMN;
+				} else if (optarg[0] == 'r') {
+					output_format = FORMAT_ROW;
+				}
+				break;
+			
+			case 'g':
+				gain = atoi(optarg);
+				break;
+
+			case 'i':
+				integ_time = atoi(optarg);
+				break;
+
+			case 'h':
+				//version();
+				usage(argv[0]);
+				exit(EXIT_SUCCESS);
+
+			case 'p':
+				period = atoi(optarg);
+				break;
+
+
+
+		} // end switch
+	} // end while
+
 
 	i2c_fd = i2c_init("/dev/i2c-1");
 
@@ -64,30 +118,39 @@ void main (int argc, char **argv) {
 	as7265x_set_integration_time (i2c_fd, integ_time);
 
 
-	// trigger one-shot conversion
-	as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
+	while (1) {
 
-	// wait for data available : TODO: should delay in loop to reduce I2C bus traffic
-	while ( ! as7265x_is_data_available(i2c_fd) ) {
-		usleep(1000);
-	}
+		// trigger one-shot conversion
+		as7265x_set_measurement_mode(i2c_fd, AS7265X_MEASUREMENT_MODE_6CHAN_ONE_SHOT);
 
-	as7265x_get_all_calibrated_values(i2c_fd, &calibrated_channels);
-	as7265x_get_all_raw_values(i2c_fd, &raw_channels);
+		// wait for data available : TODO: should delay in loop to reduce I2C bus traffic
+		while ( ! as7265x_is_data_available(i2c_fd) ) {
+			usleep(1000);
+		}
+
+		as7265x_get_all_calibrated_values(i2c_fd, &calibrated_channels);
+		as7265x_get_all_raw_values(i2c_fd, &raw_channels);
 		
-	// raw ADC
-	for (i = 0; i < 18; i++) {
-		fprintf (stdout, "%d ", (int)raw_channels.channel[i]);
-	}
+		// raw ADC
+		for (i = 0; i < 18; i++) {
+			fprintf (stdout, "%d ", (int)raw_channels.channel[i]);
+		}
 
-	fprintf (stdout,"    ");
+		fprintf (stdout,"    ");
 
-	// calibrated
-	for (i = 0; i < 18; i++) {
-		fprintf (stdout, "%.3f ", calibrated_channels.channel[i]);
+		// calibrated
+		for (i = 0; i < 18; i++) {
+			fprintf (stdout, "%.3f ", calibrated_channels.channel[i]);
+		}
+		fprintf(stdout, "\n");	
+		fflush(stdout);
+
+		if (period == -1) {
+			break;
+		} else {
+			usleep(period*1000);
+		}
 	}
-	fprintf(stdout, "\n");	
-	fflush(stdout);
 
 	close(i2c_fd);
 }
