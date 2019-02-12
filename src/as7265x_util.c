@@ -38,6 +38,7 @@ void main (int argc, char **argv) {
 	int gain;
 	int integ_time;
 	int output_format;
+	int sort_flag = 0;
 
 	// Sampling period (ms)
 	int period = -1;
@@ -47,7 +48,7 @@ void main (int argc, char **argv) {
 
 	// Parse command line arguments. See usage() for details.
 	int c;
-	while ((c = getopt(argc, argv, "a:b:c:d:f:g:hi:o:p:qs:tv")) != -1) {
+	while ((c = getopt(argc, argv, "a:b:c:d:f:g:hi:o:p:qstv")) != -1) {
 		switch(c) {
 
 			case 'a':
@@ -90,6 +91,10 @@ void main (int argc, char **argv) {
 				period = atoi(optarg);
 				break;
 
+			case 's':
+				sort_flag = 1;
+				break;
+
 
 
 		} // end switch
@@ -130,6 +135,13 @@ void main (int argc, char **argv) {
 
 		as7265x_get_all_calibrated_values(i2c_fd, &calibrated_channels);
 		as7265x_get_all_raw_values(i2c_fd, &raw_channels);
+
+		// If sort_flag set, reorder channels in ascending wavelengths
+		if (sort_flag) {
+			as7265x_order_raw_channels(i2c_fd, &raw_channels);
+			as7265x_order_calibrated_channels(i2c_fd, &calibrated_channels);
+		}
+
 		
 		// raw ADC
 		for (i = 0; i < 18; i++) {
