@@ -20,13 +20,15 @@
 
 void usage () {
 	fprintf (stderr,"as7265x_util -d <device> [options]\n");
-	fprintf (stderr," -a bulb0 current 0 - 4\n");
-	fprintf (stderr," -b bulb1 current 0 - 4\n");
-	fprintf (stderr," -c bulb2 current 0 - 4\n");
-	fprintf (stderr," -f format: c=column, r=row\n");
-	fprintf (stderr," -g gain 0 - 3\n");
-	fprintf (stderr," -i integration_time: 1 - 255 in 2.8ms units\n");
-	fprintf (stderr," -p sampling period ms\n");
+	fprintf (stderr," -a <current> bulb0 current 0-4 (default 0)\n");
+	fprintf (stderr," -b <current> bulb1 current 0-4 (default 0)\n");
+	fprintf (stderr," -c <current> bulb2 current 0-4 (default 0)\n");
+	fprintf (stderr," -d <device>  I2C device name (default /dev/i2c-1)\n");
+	fprintf (stderr," -f <format>  format: c=column, r=row (default c)\n");
+	fprintf (stderr," -g <gain>    gain 0-3 (default ?)\n");
+	fprintf (stderr," -i <time>    integration_time: 1-255 in 2.8ms units (default ?)\n");
+	fprintf (stderr," -p <time>    sampling period ms, -1=one shot (default one shot)\n");
+	fprintf (stderr," -s           if row format, sort in ascending wavelength\n");
 }
 
 void main (int argc, char **argv) {
