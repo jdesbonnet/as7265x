@@ -17,7 +17,10 @@
 
 
 void usage () {
-	fprintf (stderr,"as7265x_reading bulb0_current bulb1_current bulb1_current gain integration_time\n");
+	fprintf (stderr,"as7265x_reading bulb0_current bulb1_current bulb2_current gain integration_time\n");
+	fprintf (stderr,"bulbn_current: 0 - 4\n"); 
+	fprintf (stderr,"gain: 0 - 3\n");
+	fprintf (stderr,"integration_time: 1 - 255 in 2.8ms units\n");
 }
 
 void main (int argc, char **argv) {
