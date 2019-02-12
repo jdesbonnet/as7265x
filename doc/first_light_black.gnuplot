@@ -2,7 +2,7 @@ set title "AS7265x first light: several hours diffuse cloudy daylight (dawn to e
 
 set ylabel "time (arbitary)" textcolor rgb 'white' font ",18"
 set cblabel "ADC counts (arbitary)" textcolor rgb 'white' font ",18"
-set xlabel "AS7265x channels A (410nm), B, C, D, E, F, G, H, R (610nm), I, S, J, T, U, V, W, K, L (940nm)" textcolor rgb 'white' font ",18"
+set xlabel "AS7265x channels A (410nm), B, C, D, E, F, G, H, R (610nm), I, S, J, T, U, V, W, K, L (940nm) - Raw ADC output" textcolor rgb 'white' font ",18"
 
 set xrange [-.5:17.5]
 set yrange [0:*]
