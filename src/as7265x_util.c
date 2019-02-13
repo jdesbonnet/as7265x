@@ -117,7 +117,7 @@ void main (int argc, char **argv) {
 			as7265x_bulb_disable(i2c_fd, i);
 		} else {
 			as7265x_bulb_enable(i2c_fd, i);
-			as7265x_set_bulb_current(i2c_fd, i, bulb_current[i]+1);
+			as7265x_set_bulb_current(i2c_fd, i, bulb_current[i]-1);
 		}
 	}
 
