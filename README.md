@@ -13,6 +13,10 @@ make
 ![spectral response](./doc/as7265x_spectral_response.png)
 (from AMS AS7265x datasheet)
 
+## A banana rotting! 
+
+![banana rotting](./doc/banana.png)
+
 ## Credits
 
 Code based on Sparkfun AS7265x Arduino Library 
