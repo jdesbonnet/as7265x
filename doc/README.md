@@ -1,5 +1,13 @@
 # Notes
 
+2019-01-19
+
+List of spectra databases:
+https://www.internetchemistry.com/chemistry/spectral%20database.php
+
+Spectrum database:
+http://spectra.arizona.edu/utzinger_spectra.sql
+
 ## 2019-01-15
 
 gcc -I ../src -o estimate_rgb  estimate_rgb.c ../src/as7265x.c ../src/i2c.c ./stockman_sharpe.c -lm
@@ -17,6 +25,8 @@ http://www.cvrl.org/
 
 Human eye cones linear response: 
 linss2_10e_fine.csv
+
+https://mathematica.stackexchange.com/questions/57389/convert-spectral-distribution-to-rgb-color
 
 
 Human cone spectral sensitivities (2 degree) or cone fundamentals. The Stockman & Sharpe (2000).
